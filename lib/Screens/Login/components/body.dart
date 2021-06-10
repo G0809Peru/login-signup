@@ -1,18 +1,17 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_auth/Screens/Login/components/background.dart';
 import 'package:flutter_auth/Screens/Signup/signup_screen.dart';
 import 'package:flutter_auth/components/already_have_an_account_acheck.dart';
 import 'package:flutter_auth/components/rounded_button.dart';
 import 'package:flutter_auth/components/rounded_email.dart';
-import 'package:flutter_auth/components/rounded_input_field.dart';
 import 'package:flutter_auth/components/rounded_password_field.dart';
-import 'package:flutter_svg/svg.dart';
-import 'package:flutter_auth/constants.dart';
+import 'package:flutter_auth/homepage.dart';
 class LBody extends StatelessWidget {
   static String id = 'login_screen';
-  const LBody({
-    Key key,
-  }) : super(key: key);
+  String email,password,phone;
+
+  final _auth = FirebaseAuth.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +29,41 @@ class LBody extends StatelessWidget {
             SizedBox(height: size.height * 0.03),
             RoundedEmail(
               hintText: "Your Email",
+              onChanged: (value) {
+                email = value;
+                if(!value.contains('@'))
+                {
+                  return 'Please enter a valid email.';
+                }
+              },
             ),
             RoundedPasswordField(
-              onChanged: (value) {},
+              onChanged: (value) {
+                password = value;
+                if(password.length<6)
+                {
+                  return 'Password must be at least 6 characters.';
+                }
+              },
             ),
             RoundedButton(
               text: "LOGIN",
-              press: () {},
+              press: () async {
+                try {
+                  final user = await _auth.signInWithEmailAndPassword(email: email, password: password);
+                  if(user!=null)
+                  {
+                    Navigator.push(context,
+                    MaterialPageRoute(builder: (context) {
+                    return Home();
+                  },
+                  ),
+                  );
+                  }
+                } catch(e) {
+                  print(e);
+                }
+              },
             ),
             SizedBox(height: size.height * 0.03),
             AlreadyHaveAnAccountCheck(
